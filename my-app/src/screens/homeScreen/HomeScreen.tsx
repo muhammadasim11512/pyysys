@@ -5,7 +5,7 @@ function HomeScreen() {
   return (
     <div className="home-screen">
       <header className="nav-container" role="banner">
-        <h1 className="title">User Management System Gazal123</h1>
+        <h1 className="title">User Management System Asim Khan</h1>
         <p className="subtitle">MongoDB User Operations</p>
 
         <nav className="nav-tabs" aria-label="Primary">

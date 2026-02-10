@@ -1,55 +1,48 @@
-# Dependencies
-node_modules/
-**/node_modules/
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+terraform/tfplan
 
-# Production builds
+# Sensitive outputs
+outputs.txt
+credentials.txt
+
+# Node modules
+node_modules/
+*/node_modules/
+
+# Build outputs
 dist/
 build/
+my-app/dist/
 
-# Environment variables
+# Environment files
 .env
 .env.local
 .env.production
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# Temporary folders
-tmp/
-temp/
+# OS
+.DS_Store
+Thumbs.db
 
-# Install script generated folders (avoid recursive git repos)
-fullstack-redis-app/
-backend.log
-frontend.log
-backend.pid
-frontend.pid
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+
+# Coverage
+coverage/
+*.lcov

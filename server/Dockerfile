@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Install curl for health check
-RUN apk add --no-cache curl
+RUN apk update && apk add --no-cache curl || apk add --no-cache wget
 
 # Copy source code
 COPY . .
