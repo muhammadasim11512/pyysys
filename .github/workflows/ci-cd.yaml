@@ -93,13 +93,14 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       continue-on-error: true
 
   build-and-push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     needs: [security-scan, sonarqube-scan]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && always()
     
     outputs:
       backend_image: ${{ steps.backend-image.outputs.image }}
@@ -217,9 +218,11 @@ jobs:
         # Check pod status
         kubectl get pods -n fullstack-app
         
-        # Update image tags in deployments
-        sed "s|BACKEND_IMAGE_PLACEHOLDER|$BACKEND_IMAGE|g" k8s/backend-deployment.yaml | kubectl apply -f -
-        sed "s|FRONTEND_IMAGE_PLACEHOLDER|$FRONTEND_IMAGE|g" k8s/frontend-deployment.yaml | kubectl apply -f -
+        # Deploy backend with image replacement
+        cat k8s/backend-deployment.yaml | sed "s|BACKEND_IMAGE_PLACEHOLDER|$BACKEND_IMAGE|g" | kubectl apply -f -
+        
+        # Deploy frontend with image replacement
+        cat k8s/frontend-deployment.yaml | sed "s|FRONTEND_IMAGE_PLACEHOLDER|$FRONTEND_IMAGE|g" | kubectl apply -f -
         
         # Apply ingress
         kubectl apply -f k8s/ingress.yaml
