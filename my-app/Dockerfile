@@ -24,31 +24,10 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy custom nginx config
-COPY nginx-custom.conf /etc/nginx/nginx.conf
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S appuser || true
-RUN adduser -S appuser -u 1001 -G appuser || true
-
-# Change ownership of nginx directories
-RUN chown -R appuser:appuser /var/cache/nginx && \
-    chown -R appuser:appuser /var/log/nginx && \
-    chown -R appuser:appuser /etc/nginx/conf.d && \
-    chown -R appuser:appuser /usr/share/nginx/html
-
-# Create nginx PID directory with proper permissions
-RUN mkdir -p /tmp/nginx && \
-    chown -R appuser:appuser /tmp/nginx
-
-# Switch to non-root user
-USER appuser
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
-# Start nginx with custom config
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
