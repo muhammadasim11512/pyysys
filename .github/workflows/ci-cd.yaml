@@ -200,6 +200,10 @@ jobs:
         BACKEND_IMAGE: ${{ needs.build-and-push.outputs.backend_image }}
         FRONTEND_IMAGE: ${{ needs.build-and-push.outputs.frontend_image }}
       run: |
+        # Debug: Show image values
+        echo "Backend Image: $BACKEND_IMAGE"
+        echo "Frontend Image: $FRONTEND_IMAGE"
+        
         # Apply namespace and configs
         kubectl apply -f k8s/namespace.yaml
         kubectl apply -f k8s/configmap.yaml
@@ -209,7 +213,7 @@ jobs:
         kubectl apply -f k8s/mongodb-deployment.yaml
         kubectl apply -f k8s/redis-deployment.yaml
         
-        # Wait for databases with longer timeout
+        # Wait for databases
         echo "Waiting for MongoDB..."
         kubectl wait --for=condition=ready pod -l app=mongodb -n fullstack-app --timeout=300s || true
         echo "Waiting for Redis..."
@@ -219,10 +223,12 @@ jobs:
         kubectl get pods -n fullstack-app
         
         # Deploy backend with image replacement
-        cat k8s/backend-deployment.yaml | sed "s|BACKEND_IMAGE_PLACEHOLDER|$BACKEND_IMAGE|g" | kubectl apply -f -
+        echo "Deploying backend with image: $BACKEND_IMAGE"
+        cat k8s/backend-deployment.yaml | sed "s|BACKEND_IMAGE_PLACEHOLDER|${BACKEND_IMAGE}|g" | kubectl apply -f -
         
         # Deploy frontend with image replacement
-        cat k8s/frontend-deployment.yaml | sed "s|FRONTEND_IMAGE_PLACEHOLDER|$FRONTEND_IMAGE|g" | kubectl apply -f -
+        echo "Deploying frontend with image: $FRONTEND_IMAGE"
+        cat k8s/frontend-deployment.yaml | sed "s|FRONTEND_IMAGE_PLACEHOLDER|${FRONTEND_IMAGE}|g" | kubectl apply -f -
         
         # Apply ingress
         kubectl apply -f k8s/ingress.yaml
