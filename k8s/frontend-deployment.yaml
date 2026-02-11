@@ -13,8 +13,6 @@ spec:
       labels:
         app: frontend
     spec:
-      securityContext:
-        fsGroup: 1001
       containers:
       - name: frontend
         image: FRONTEND_IMAGE_PLACEHOLDER
@@ -39,14 +37,6 @@ spec:
             port: 80
           initialDelaySeconds: 15
           periodSeconds: 5
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1001
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
-          capabilities:
-            drop:
-            - ALL
 ---
 apiVersion: v1
 kind: Service
