@@ -134,6 +134,7 @@ jobs:
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" > /tmp/backend_image.txt
 
     - name: Build and Push Frontend Image
       id: frontend-image
@@ -148,6 +149,15 @@ jobs:
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" > /tmp/frontend_image.txt
+
+    - name: Upload image info as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: image-tags
+        path: |
+          /tmp/backend_image.txt
+          /tmp/frontend_image.txt
 
     - name: Scan Backend Image with Trivy
       uses: aquasecurity/trivy-action@master
@@ -181,6 +191,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Download image tags
+      uses: actions/download-artifact@v3
+      with:
+        name: image-tags
+        path: /tmp
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -196,10 +212,11 @@ jobs:
       uses: azure/setup-kubectl@v3
 
     - name: Deploy to Kubernetes
-      env:
-        BACKEND_IMAGE: ${{ needs.build-and-push.outputs.backend_image }}
-        FRONTEND_IMAGE: ${{ needs.build-and-push.outputs.frontend_image }}
       run: |
+        # Read image tags from artifacts
+        BACKEND_IMAGE=$(cat /tmp/backend_image.txt)
+        FRONTEND_IMAGE=$(cat /tmp/frontend_image.txt)
+        
         # Debug: Show image values
         echo "Backend Image: $BACKEND_IMAGE"
         echo "Frontend Image: $FRONTEND_IMAGE"
