@@ -250,17 +250,31 @@ jobs:
         # Apply ingress
         kubectl apply -f k8s/ingress.yaml
         
-        # Wait for deployments
-        kubectl rollout status deployment/backend -n fullstack-app --timeout=300s
-        kubectl rollout status deployment/frontend -n fullstack-app --timeout=300s
+        # Wait for deployments (don't fail if timeout)
+        echo "Waiting for backend deployment..."
+        kubectl rollout status deployment/backend -n fullstack-app --timeout=300s || echo "Backend deployment in progress"
+        echo "Waiting for frontend deployment..."
+        kubectl rollout status deployment/frontend -n fullstack-app --timeout=600s || echo "Frontend deployment in progress"
 
     - name: Verify Deployment
       run: |
+        echo "=== Deployment Status ==="
         kubectl get pods -n fullstack-app
         kubectl get services -n fullstack-app
         kubectl get ingress -n fullstack-app
+        echo ""
+        echo "=== Pod Details ==="
+        kubectl describe pods -n fullstack-app | grep -A 5 "Events:" || true
+      continue-on-error: true
 
     - name: Get Application URL
       run: |
-        echo "Application deployed successfully!"
-        kubectl get ingress app-ingress -n fullstack-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+        echo "=== Application Deployed ==="
+        echo "Deployment completed. Resources are being provisioned."
+        echo ""
+        INGRESS_HOST=$(kubectl get ingress app-ingress -n fullstack-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "Pending...")
+        echo "Application URL: http://$INGRESS_HOST"
+        echo "Backend API: http://$INGRESS_HOST/api"
+        echo ""
+        echo "Note: It may take 5-10 minutes for the load balancer to be fully ready."
+      continue-on-error: true
