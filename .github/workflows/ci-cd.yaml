@@ -152,7 +152,7 @@ jobs:
         echo "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" > /tmp/frontend_image.txt
 
     - name: Upload image info as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: image-tags
         path: |
@@ -192,7 +192,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Download image tags
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: image-tags
         path: /tmp
